@@ -1,0 +1,98 @@
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/assets/fonts/Satoshi.woff2") format("woff2");
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark sports theme — neon green accent */
+    --background: 0.13 0 0;
+    --foreground: 0.96 0 0;
+    --card: 0.17 0 0;
+    --card-foreground: 0.96 0 0;
+    --popover: 0.17 0 0;
+    --popover-foreground: 0.96 0 0;
+    --primary: 0.88 0.29 145;
+    --primary-foreground: 0.13 0 0;
+    --secondary: 0.22 0 0;
+    --secondary-foreground: 0.96 0 0;
+    --muted: 0.22 0 0;
+    --muted-foreground: 0.6 0 0;
+    --accent: 0.88 0.29 145;
+    --accent-foreground: 0.13 0 0;
+    --destructive: 0.55 0.22 25;
+    --destructive-foreground: 0.96 0 0;
+    --border: 0.25 0 0;
+    --input: 0.22 0 0;
+    --ring: 0.88 0.29 145;
+    --radius: 0.75rem;
+    --chart-1: 0.88 0.29 145;
+    --chart-2: 0.55 0.22 25;
+    --chart-3: 0.7 0.15 60;
+    --chart-4: 0.65 0.18 200;
+    --chart-5: 0.6 0.2 300;
+    --sidebar: 0.15 0 0;
+    --sidebar-foreground: 0.96 0 0;
+    --sidebar-primary: 0.88 0.29 145;
+    --sidebar-primary-foreground: 0.13 0 0;
+    --sidebar-accent: 0.22 0 0;
+    --sidebar-accent-foreground: 0.96 0 0;
+    --sidebar-border: 0.25 0 0;
+    --sidebar-ring: 0.88 0.29 145;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Satoshi", "General Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Bricolage Grotesque", sans-serif;
+  }
+}
+
+/* Bottom nav safe area */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Neon glow effect */
+.neon-glow {
+  box-shadow: 0 0 12px oklch(0.88 0.29 145 / 0.4), 0 0 32px oklch(0.88 0.29 145 / 0.15);
+}
+
+.neon-text-glow {
+  text-shadow: 0 0 20px oklch(0.88 0.29 145 / 0.6);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(0.13 0 0);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.3 0 0);
+  border-radius: 2px;
+}
