@@ -13,6 +13,7 @@ export type TranslationKey =
   | "home"
   | "stats"
   | "groups"
+  | "friends"
   | "shop"
   | "settings"
   | "predict"
@@ -78,6 +79,7 @@ const translations: AllTranslations = {
     home: "Home",
     stats: "Stats",
     groups: "Groups",
+    friends: "Friends",
     shop: "Shop",
     settings: "Settings",
     predict: "Predict",
@@ -139,6 +141,7 @@ const translations: AllTranslations = {
     home: "होम",
     stats: "आँकड़े",
     groups: "ग्रुप",
+    friends: "दोस्त",
     shop: "शॉप",
     settings: "सेटिंग",
     predict: "भविष्यवाणी",
@@ -200,6 +203,7 @@ const translations: AllTranslations = {
     home: "முகப்பு",
     stats: "புள்ளிவிவரம்",
     groups: "குழுக்கள்",
+    friends: "நண்பர்கள்",
     shop: "கடை",
     settings: "அமைப்புகள்",
     predict: "கணிக்க",
@@ -261,6 +265,7 @@ const translations: AllTranslations = {
     home: "హోమ్",
     stats: "గణాంకాలు",
     groups: "గ్రూపులు",
+    friends: "స్నేహితులు",
     shop: "షాప్",
     settings: "సెట్టింగ్స్",
     predict: "అంచనా",
@@ -322,6 +327,7 @@ const translations: AllTranslations = {
     home: "হোম",
     stats: "পরিসংখ্যান",
     groups: "গ্রুপ",
+    friends: "বন্ধুরা",
     shop: "দোকান",
     settings: "সেটিংস",
     predict: "পূর্বাভাস",

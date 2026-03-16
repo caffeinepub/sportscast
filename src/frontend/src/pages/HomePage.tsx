@@ -8,14 +8,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, RefreshCw, Trophy, Zap } from "lucide-react";
+import { CalendarDays, Clock, Timer, Trophy, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLang } from "../context/LangContext";
 import { useActor } from "../hooks/useActor";
 import {
-  MATCHES,
+  IPL_2026_MATCHES,
   type Match,
   formatCountdown,
   formatMatchTime,
@@ -30,19 +30,32 @@ import {
 } from "../utils/storage";
 import type { Prediction } from "../utils/storage";
 
+function CountdownTimer({ matchTime }: { matchTime: number }) {
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const text = formatCountdown(matchTime);
+
+  return (
+    <div className="flex items-center gap-1 text-primary">
+      <Timer size={11} className="shrink-0" />
+      <span className="text-[11px] font-semibold tabular-nums">{text}</span>
+      <span className="text-[10px] text-primary/70">to start</span>
+    </div>
+  );
+}
+
 function MatchCard({ match }: { match: Match }) {
   const { t } = useLang();
-  const [, forceUpdate] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [pred, setPred] = useState<Prediction | undefined>(() =>
     getPredictionForMatch(match.id),
   );
-
-  useEffect(() => {
-    const interval = setInterval(() => forceUpdate((n) => n + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const predictOpen = isPredictOpen(match.matchTime, match.status);
   const hoursUntil = (match.matchTime - Date.now()) / (1000 * 3600);
@@ -77,6 +90,7 @@ function MatchCard({ match }: { match: Match }) {
     <>
       <Card className="bg-card border-border overflow-hidden">
         <CardContent className="p-0">
+          {/* Header row */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-border">
             <div className="flex items-center gap-2">
               <span className="text-lg">🏏</span>
@@ -93,15 +107,27 @@ function MatchCard({ match }: { match: Match }) {
                 IPL
               </span>
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground text-xs">
-              <Clock size={11} />
-              <span>
-                {match.status === "upcoming"
-                  ? formatCountdown(match.matchTime)
-                  : formatMatchTime(match.matchTime)}
-              </span>
+            <div>
+              {match.status === "upcoming" ? (
+                <CountdownTimer matchTime={match.matchTime} />
+              ) : (
+                <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <Clock size={11} />
+                  <span>{formatMatchTime(match.matchTime)}</span>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Date row for upcoming matches */}
+          {match.status === "upcoming" && (
+            <div className="flex items-center gap-1 px-4 pt-2 text-muted-foreground">
+              <CalendarDays size={10} />
+              <span className="text-[10px]">
+                {formatMatchTime(match.matchTime)}
+              </span>
+            </div>
+          )}
 
           <div className="px-4 py-4">
             <div className="flex items-center justify-between gap-2">
@@ -274,10 +300,10 @@ export default function HomePage() {
   const { t } = useLang();
   const { actor, isFetching } = useActor();
   const profile = getProfile();
-  const [matches, setMatches] = useState<Match[]>(MATCHES);
-  const [loading, setLoading] = useState(false);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [dataSource, setDataSource] = useState<"live" | "static">("static");
+  const [usingSchedule, setUsingSchedule] = useState(false);
 
   useEffect(() => {
     if (!actor || isFetching) return;
@@ -289,36 +315,30 @@ export default function HomePage() {
         const iplEspnJson: string = result?.iplEspn ?? "";
         const fetchTime: bigint = result?.fetchTime ?? BigInt(0);
 
-        const cricketMatches = cricketJson
+        const liveMatches = cricketJson
           ? parseCricketFixtures(cricketJson)
           : iplEspnJson
             ? parseEspnCricketFixtures(iplEspnJson)
             : [];
 
-        const staticOnly = MATCHES.filter(
-          (s) =>
-            !cricketMatches.some(
-              (a) => a.teamA === s.teamA && a.teamB === s.teamB,
-            ),
-        );
-        const combined = [...cricketMatches, ...staticOnly];
-
-        if (combined.length > 0) {
-          combined.sort((a, b) => a.matchTime - b.matchTime);
-          setMatches(combined);
-          setDataSource("live");
+        if (liveMatches.length > 0) {
+          liveMatches.sort((a, b) => a.matchTime - b.matchTime);
+          setMatches(liveMatches);
+          setUsingSchedule(false);
           if (fetchTime > BigInt(0)) {
             setLastUpdated(new Date(Number(fetchTime / BigInt(1_000_000))));
           } else {
             setLastUpdated(new Date());
           }
         } else {
-          setMatches(MATCHES);
-          setDataSource("static");
+          // Fallback to IPL 2026 schedule
+          setMatches(IPL_2026_MATCHES);
+          setUsingSchedule(true);
+          setLastUpdated(null);
         }
       } catch {
-        setMatches(MATCHES);
-        setDataSource("static");
+        setMatches(IPL_2026_MATCHES);
+        setUsingSchedule(true);
       } finally {
         setLoading(false);
       }
@@ -335,9 +355,11 @@ export default function HomePage() {
               MatchMind
             </h1>
             <p className="text-xs text-muted-foreground">
-              {dataSource === "live" && lastUpdated
-                ? `🟢 Live · Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                : t("matchPredictions")}
+              {usingSchedule
+                ? "🗓 IPL 2026 Schedule"
+                : lastUpdated
+                  ? `🟢 Live · Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                  : t("matchPredictions")}
             </p>
           </div>
           <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5">
@@ -348,12 +370,6 @@ export default function HomePage() {
             <span className="text-primary/70 text-xs">{t("points")}</span>
           </div>
         </div>
-        {loading && (
-          <div className="px-4 pb-2 flex items-center gap-1 text-muted-foreground">
-            <RefreshCw size={11} className="animate-spin" />
-            <span className="text-[10px]">Loading...</span>
-          </div>
-        )}
       </header>
 
       <main className="px-4 py-4 space-y-3">
@@ -378,14 +394,35 @@ export default function HomePage() {
             ))}
           </AnimatePresence>
         )}
+
         {!loading && matches.length === 0 && (
           <div
             data-ocid="home.empty_state"
             className="text-center py-16 text-muted-foreground"
           >
             <p className="text-4xl mb-3">🏏</p>
-            <p className="font-medium">No matches found</p>
+            <p className="font-medium">No live IPL matches right now</p>
+            <p className="text-sm mt-1">
+              Check back when the IPL season starts
+            </p>
           </div>
+        )}
+
+        {!loading && usingSchedule && matches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground"
+          >
+            <CalendarDays size={14} className="text-primary shrink-0 mt-0.5" />
+            <span>
+              More matches will be added as the season schedule is released —{" "}
+              <span className="text-primary font-medium">
+                Season opens March 22, 2026
+              </span>
+            </span>
+          </motion.div>
         )}
       </main>
     </div>

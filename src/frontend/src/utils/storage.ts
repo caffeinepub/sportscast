@@ -112,3 +112,44 @@ export function saveCart(cart: CartItem[]): void {
 export function clearCart(): void {
   localStorage.removeItem(KEYS.cart);
 }
+
+// Friends feature
+export interface Friend {
+  username: string;
+  points: number;
+  addedAt: number;
+}
+
+// Mock user registry for search
+const MOCK_USERS: Friend[] = [
+  { username: "RohitFan99", points: 340, addedAt: 0 },
+  { username: "ViratKing", points: 290, addedAt: 0 },
+  { username: "DhoniLover", points: 275, addedAt: 0 },
+  { username: "IPLPunter", points: 210, addedAt: 0 },
+  { username: "CricketGuru", points: 195, addedAt: 0 },
+  { username: "SixHitter", points: 180, addedAt: 0 },
+  { username: "WicketWatch", points: 165, addedAt: 0 },
+  { username: "BoundaryBoss", points: 150, addedAt: 0 },
+  { username: "SpinMaster", points: 140, addedAt: 0 },
+  { username: "PitchPerfect", points: 120, addedAt: 0 },
+  { username: "StumpSmasher", points: 100, addedAt: 0 },
+  { username: "OverAnalyzer", points: 85, addedAt: 0 },
+];
+
+export function searchUsers(query: string): Friend[] {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase();
+  return MOCK_USERS.filter((u) => u.username.toLowerCase().includes(q));
+}
+
+export function getFriends(): Friend[] {
+  try {
+    const raw = localStorage.getItem("sc_friends");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+export function saveFriends(friends: Friend[]): void {
+  localStorage.setItem("sc_friends", JSON.stringify(friends));
+}

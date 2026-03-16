@@ -9,74 +9,111 @@ export interface Match {
   venue?: string;
 }
 
-const now = Date.now();
+const toUtcMs = (dateStr: string, istHour: number, istMin: number): number => {
+  const totalIstMins = istHour * 60 + istMin;
+  const totalUtcMins = totalIstMins - 330; // IST is UTC+5:30
+  const utcHour = Math.floor(totalUtcMins / 60);
+  const utcMin = totalUtcMins % 60;
+  return new Date(
+    `${dateStr}T${String(utcHour).padStart(2, "0")}:${String(utcMin).padStart(2, "0")}:00Z`,
+  ).getTime();
+};
 
-export const MATCHES: Match[] = [
+export const IPL_2026_MATCHES: Match[] = [
   {
-    id: "m1",
-    sport: "cricket",
+    id: "ipl2026_01",
+    sport: "cricket" as const,
     teamA: "Mumbai Indians",
-    teamB: "Chennai Super Kings",
-    matchTime: now + 3600 * 1000 * 26,
+    teamB: "Kolkata Knight Riders",
+    matchTime: toUtcMs("2026-03-22", 19, 30),
     status: "upcoming",
     venue: "Wankhede Stadium, Mumbai",
   },
   {
-    id: "m2",
-    sport: "cricket",
-    teamA: "Royal Challengers Bengaluru",
-    teamB: "Kolkata Knight Riders",
-    matchTime: now + 3600 * 1000 * 50,
+    id: "ipl2026_02",
+    sport: "cricket" as const,
+    teamA: "Chennai Super Kings",
+    teamB: "Royal Challengers Bengaluru",
+    matchTime: toUtcMs("2026-03-23", 19, 30),
     status: "upcoming",
-    venue: "M. Chinnaswamy Stadium, Bengaluru",
+    venue: "MA Chidambaram Stadium, Chennai",
   },
   {
-    id: "m3",
-    sport: "cricket",
+    id: "ipl2026_03",
+    sport: "cricket" as const,
+    teamA: "Sunrisers Hyderabad",
+    teamB: "Rajasthan Royals",
+    matchTime: toUtcMs("2026-03-24", 19, 30),
+    status: "upcoming",
+    venue: "Rajiv Gandhi International Stadium, Hyderabad",
+  },
+  {
+    id: "ipl2026_04",
+    sport: "cricket" as const,
     teamA: "Delhi Capitals",
-    teamB: "Punjab Kings",
-    matchTime: now + 3600 * 1000 * 74,
+    teamB: "Lucknow Super Giants",
+    matchTime: toUtcMs("2026-03-25", 19, 30),
     status: "upcoming",
     venue: "Arun Jaitley Stadium, Delhi",
   },
   {
-    id: "m4",
-    sport: "cricket",
-    teamA: "Rajasthan Royals",
-    teamB: "Sunrisers Hyderabad",
-    matchTime: now + 3600 * 1000 * 98,
-    status: "upcoming",
-    venue: "Sawai Mansingh Stadium, Jaipur",
-  },
-  {
-    id: "m5",
-    sport: "cricket",
+    id: "ipl2026_05",
+    sport: "cricket" as const,
     teamA: "Gujarat Titans",
-    teamB: "Lucknow Super Giants",
-    matchTime: now + 3600 * 1000 * 122,
+    teamB: "Punjab Kings",
+    matchTime: toUtcMs("2026-03-26", 19, 30),
     status: "upcoming",
     venue: "Narendra Modi Stadium, Ahmedabad",
   },
   {
-    id: "m6",
-    sport: "cricket",
-    teamA: "Chennai Super Kings",
-    teamB: "Kolkata Knight Riders",
-    matchTime: now - 3600 * 1000 * 2,
-    status: "live",
-    venue: "MA Chidambaram Stadium, Chennai",
+    id: "ipl2026_06",
+    sport: "cricket" as const,
+    teamA: "Kolkata Knight Riders",
+    teamB: "Sunrisers Hyderabad",
+    matchTime: toUtcMs("2026-03-27", 19, 30),
+    status: "upcoming",
+    venue: "Eden Gardens, Kolkata",
   },
   {
-    id: "m7",
-    sport: "cricket",
-    teamA: "Mumbai Indians",
-    teamB: "Rajasthan Royals",
-    matchTime: now - 3600 * 1000 * 48,
-    status: "completed",
-    winningTeam: "Mumbai Indians",
-    venue: "Wankhede Stadium, Mumbai",
+    id: "ipl2026_07",
+    sport: "cricket" as const,
+    teamA: "Rajasthan Royals",
+    teamB: "Mumbai Indians",
+    matchTime: toUtcMs("2026-03-28", 15, 30),
+    status: "upcoming",
+    venue: "Sawai Mansingh Stadium, Jaipur",
+  },
+  {
+    id: "ipl2026_08",
+    sport: "cricket" as const,
+    teamA: "Punjab Kings",
+    teamB: "Chennai Super Kings",
+    matchTime: toUtcMs("2026-03-29", 15, 30),
+    status: "upcoming",
+    venue: "Punjab Cricket Association Stadium, Mohali",
+  },
+  {
+    id: "ipl2026_09",
+    sport: "cricket" as const,
+    teamA: "Lucknow Super Giants",
+    teamB: "Royal Challengers Bengaluru",
+    matchTime: toUtcMs("2026-03-29", 19, 30),
+    status: "upcoming",
+    venue: "BRSABV Ekana Cricket Stadium, Lucknow",
+  },
+  {
+    id: "ipl2026_10",
+    sport: "cricket" as const,
+    teamA: "Gujarat Titans",
+    teamB: "Delhi Capitals",
+    matchTime: toUtcMs("2026-03-30", 19, 30),
+    status: "upcoming",
+    venue: "Narendra Modi Stadium, Ahmedabad",
   },
 ];
+
+// Backward compat — no static/fake matches
+export const MATCHES: Match[] = [];
 
 export function isPredictOpen(matchTime: number, status: string): boolean {
   if (status === "completed" || status === "live") return false;
@@ -86,11 +123,14 @@ export function isPredictOpen(matchTime: number, status: string): boolean {
 
 export function formatCountdown(matchTime: number): string {
   const diff = matchTime - Date.now();
-  if (diff <= 0) return "Started";
-  const h = Math.floor(diff / (1000 * 3600));
+  if (diff <= 0) return "Starting soon";
+  const days = Math.floor(diff / (1000 * 3600 * 24));
+  const h = Math.floor((diff % (1000 * 3600 * 24)) / (1000 * 3600));
   const m = Math.floor((diff % (1000 * 3600)) / (1000 * 60));
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  const s = Math.floor((diff % (1000 * 60)) / 1000);
+  if (days > 0) return `${days}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  return `${m}m ${s}s`;
 }
 
 export function formatMatchTime(matchTime: number): string {
