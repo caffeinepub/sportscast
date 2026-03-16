@@ -419,7 +419,7 @@ export default function HomePage() {
             <span>
               More matches will be added as the season schedule is released —{" "}
               <span className="text-primary font-medium">
-                Season opens March 22, 2026
+                Season opens March 28, 2026
               </span>
             </span>
           </motion.div>

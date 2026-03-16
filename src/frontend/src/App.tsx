@@ -8,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 import { LangProvider, useLang } from "./context/LangContext";
 import FriendsPage from "./pages/FriendsPage";
 import GroupsPage from "./pages/GroupsPage";
@@ -37,6 +38,9 @@ function AppInner() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
+
       {/* Page content */}
       <main className="flex-1 overflow-y-auto pb-20">
         {activeTab === "home" && <HomePage />}
