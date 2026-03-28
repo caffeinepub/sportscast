@@ -14,7 +14,7 @@ interface Product {
   affiliateUrl: string;
 }
 
-const PRODUCTS: Product[] = [
+const JERSEYS: Product[] = [
   {
     id: "p1",
     name: "IPL Jersey",
@@ -24,71 +24,95 @@ const PRODUCTS: Product[] = [
     tag: "Bestseller",
     affiliateUrl: "https://amzn.in/d/08SzK5x1",
   },
+];
+
+const FRAMES: Product[] = [
   {
-    id: "p2",
-    name: "Sports Cap",
-    emoji: "🧢",
-    price: "₹199+",
-    description: "Premium embroidered IPL team cap",
-    affiliateUrl: "https://www.amazon.in/s?k=ipl+cricket+cap",
-  },
-  {
-    id: "p3",
-    name: "Cricket Bat",
-    emoji: "🏏",
-    price: "₹999+",
-    description: "Practice bat used by cricket enthusiasts",
-    tag: "Popular",
-    affiliateUrl: "https://www.amazon.in/s?k=cricket+bat",
-  },
-  {
-    id: "p4",
-    name: "Cricket Ball",
-    emoji: "🔴",
-    price: "₹249+",
-    description: "Leather cricket ball for match play",
-    affiliateUrl: "https://www.amazon.in/s?k=leather+cricket+ball",
-  },
-  {
-    id: "p5",
-    name: "IPL Fan Scarf",
-    emoji: "🧣",
-    price: "₹179+",
-    description: "Cozy fleece scarf in IPL team colors",
-    affiliateUrl: "https://www.amazon.in/s?k=ipl+fan+scarf",
-  },
-  {
-    id: "p6",
-    name: "Batting Gloves",
-    emoji: "🧤",
-    price: "₹599+",
-    description: "Pro-grade batting gloves for grip & protection",
+    id: "f1",
+    name: "Cricket Photo Frame",
+    emoji: "🖼️",
+    price: "₹299+",
+    description: "Stylish photo frame for your cricket memories",
     tag: "New",
-    affiliateUrl: "https://www.amazon.in/s?k=cricket+batting+gloves",
-  },
-  {
-    id: "p7",
-    name: "Cricket Helmet",
-    emoji: "⛑️",
-    price: "₹1,299+",
-    description: "Safety helmet for batting & wicketkeeping",
-    affiliateUrl: "https://www.amazon.in/s?k=cricket+helmet",
-  },
-  {
-    id: "p8",
-    name: "Sports Water Bottle",
-    emoji: "🍶",
-    price: "₹249+",
-    description: "BPA-free 1L bottle for match day hydration",
-    affiliateUrl: "https://www.amazon.in/s?k=sports+water+bottle",
+    affiliateUrl: "https://amzn.in/d/0ca8lBN8",
   },
 ];
 
-export default function ShopPage() {
+const MUGS: Product[] = [
+  {
+    id: "m1",
+    name: "Cricket Mug",
+    emoji: "☕",
+    price: "₹349+",
+    description: "Cricket-themed ceramic mug, perfect for match days",
+    tag: "Popular",
+    affiliateUrl: "https://www.amazon.in/s?k=cricket+mug+cup",
+  },
+];
+
+function ProductGrid({
+  products,
+  startIndex,
+}: { products: Product[]; startIndex: number }) {
   function openAffiliate(url: string) {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {products.map((product, i) => (
+        <motion.div
+          key={product.id}
+          data-ocid={`shop.product.item.${startIndex + i + 1}`}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.06 }}
+        >
+          <Card
+            className="card-gradient border-border overflow-hidden h-full flex flex-col cursor-pointer hover:border-primary/50 hover:shadow-md transition-all active:scale-95"
+            onClick={() => openAffiliate(product.affiliateUrl)}
+          >
+            <CardContent className="p-4 flex flex-col flex-1">
+              {product.tag && (
+                <Badge className="self-start mb-2 bg-primary/20 text-primary border-primary/30 text-[10px]">
+                  {product.tag}
+                </Badge>
+              )}
+              <div className="bg-primary/5 rounded-full p-3 flex items-center justify-center mb-3 self-start">
+                <span className="text-5xl">{product.emoji}</span>
+              </div>
+              <p className="font-semibold text-sm text-foreground">
+                {product.name}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 flex-1 line-clamp-2">
+                {product.description}
+              </p>
+              <div className="mt-3 mb-2">
+                <span className="text-primary font-bold text-sm">
+                  {product.price}
+                </span>
+              </div>
+              <Button
+                data-ocid={`shop.product.button.${startIndex + i + 1}`}
+                size="sm"
+                className="w-full bg-primary text-primary-foreground text-xs gap-1.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openAffiliate(product.affiliateUrl);
+                }}
+              >
+                <ExternalLink size={11} />
+                Buy Now
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+export default function ShopPage() {
   return (
     <div className="min-h-full">
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-4">
@@ -102,55 +126,33 @@ export default function ShopPage() {
         </div>
       </header>
 
-      <main className="px-4 py-4">
-        <div className="grid grid-cols-2 gap-3">
-          {PRODUCTS.map((product, i) => (
-            <motion.div
-              key={product.id}
-              data-ocid={`shop.product.item.${i + 1}`}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-            >
-              <Card
-                className="bg-card border-border overflow-hidden h-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors active:scale-95"
-                onClick={() => openAffiliate(product.affiliateUrl)}
-              >
-                <CardContent className="p-4 flex flex-col flex-1">
-                  {product.tag && (
-                    <Badge className="self-start mb-2 bg-primary/20 text-primary border-primary/30 text-[10px]">
-                      {product.tag}
-                    </Badge>
-                  )}
-                  <div className="text-4xl mb-3">{product.emoji}</div>
-                  <p className="font-semibold text-sm text-foreground">
-                    {product.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1 flex-1 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="mt-3 mb-2">
-                    <span className="text-primary font-bold text-sm">
-                      {product.price}
-                    </span>
-                  </div>
-                  <Button
-                    data-ocid={`shop.product.button.${i + 1}`}
-                    size="sm"
-                    className="w-full bg-primary text-primary-foreground text-xs gap-1.5"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openAffiliate(product.affiliateUrl);
-                    }}
-                  >
-                    <ExternalLink size={11} />
-                    Buy Now
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+      <main className="px-4 py-4 space-y-6">
+        <section>
+          <h2 className="font-bold text-base text-foreground mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+            Jerseys
+          </h2>
+          <ProductGrid products={JERSEYS} startIndex={0} />
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base text-foreground mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+            Frames
+          </h2>
+          <ProductGrid products={FRAMES} startIndex={JERSEYS.length} />
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base text-foreground mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+            Mugs
+          </h2>
+          <ProductGrid
+            products={MUGS}
+            startIndex={JERSEYS.length + FRAMES.length}
+          />
+        </section>
 
         <p className="text-center text-[10px] text-muted-foreground mt-6 px-4">
           * This page contains affiliate links. We may earn a commission on

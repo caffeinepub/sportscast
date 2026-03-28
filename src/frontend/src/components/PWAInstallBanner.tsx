@@ -14,10 +14,8 @@ export default function PWAInstallBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Don't show if previously dismissed
     if (localStorage.getItem(DISMISSED_KEY)) return;
 
-    // Only show on mobile/tablet
     const isMobileOrTablet =
       /Mobi|Android|iPad|iPhone|Tablet/i.test(navigator.userAgent) ||
       window.innerWidth <= 1024;
@@ -55,14 +53,12 @@ export default function PWAInstallBanner() {
   return (
     <div
       data-ocid="pwa.banner"
-      className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border"
-      style={{ background: "#1a1a1a" }}
+      className="flex items-center gap-3 px-4 py-3 bg-primary/5 border-b border-primary/20"
     >
-      {/* Cricket ball icon */}
       <span className="text-xl flex-shrink-0">🏏</span>
 
       <p className="flex-1 text-sm font-medium text-foreground leading-tight">
-        Add <span className="text-primary font-semibold">MatchMind</span> to
+        Add <span className="text-primary font-semibold">Crick Mind</span> to
         your home screen
       </p>
 
@@ -70,7 +66,7 @@ export default function PWAInstallBanner() {
         type="button"
         data-ocid="pwa.primary_button"
         onClick={handleInstall}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-background bg-primary hover:opacity-90 active:scale-95 transition-all flex-shrink-0"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-primary-foreground bg-primary hover:opacity-90 active:scale-95 transition-all flex-shrink-0"
       >
         <Download size={12} />
         Install

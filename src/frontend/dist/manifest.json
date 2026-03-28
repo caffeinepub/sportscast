@@ -1,11 +1,11 @@
 {
-  "name": "MatchMind - IPL Predictions",
-  "short_name": "MatchMind",
+  "name": "Crick Mind - IPL Predictions",
+  "short_name": "Crick Mind",
   "description": "Predict IPL cricket matches, compete with friends, and climb the leaderboard.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#00FF66",
+  "background_color": "#ffffff",
+  "theme_color": "#7c3aed",
   "orientation": "portrait",
   "icons": [
     {

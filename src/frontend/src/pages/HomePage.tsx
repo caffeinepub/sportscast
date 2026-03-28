@@ -8,11 +8,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, Clock, Timer, Trophy, Zap } from "lucide-react";
+import { Bell, CalendarDays, Clock, Timer, Trophy, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import NotificationPanel from "../components/NotificationPanel";
 import { useLang } from "../context/LangContext";
+import { useNotifications } from "../context/NotificationContext";
 import { useActor } from "../hooks/useActor";
 import {
   IPL_2026_MATCHES,
@@ -59,6 +61,7 @@ function MatchCard({ match }: { match: Match }) {
 
   const predictOpen = isPredictOpen(match.matchTime, match.status);
   const hoursUntil = (match.matchTime - Date.now()) / (1000 * 3600);
+  const minutesUntil = (match.matchTime - Date.now()) / (1000 * 60);
 
   function handleSubmit() {
     if (!selected) return;
@@ -86,9 +89,19 @@ function MatchCard({ match }: { match: Match }) {
     completed: "bg-muted text-muted-foreground border-border",
   };
 
+  function getPredictClosedHint(): string | null {
+    if (match.status !== "upcoming") return null;
+    if (hoursUntil > 48) return "Prediction opens 2 days before match";
+    if (minutesUntil <= 5 && minutesUntil > 0)
+      return "Closes 5 min before kickoff";
+    return null;
+  }
+
+  const closedHint = getPredictClosedHint();
+
   return (
     <>
-      <Card className="bg-card border-border overflow-hidden">
+      <Card className="card-gradient border-border overflow-hidden border-t-2 border-t-primary/40 shadow-sm hover:shadow-md transition-shadow">
         <CardContent className="p-0">
           {/* Header row */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-border">
@@ -104,7 +117,7 @@ function MatchCard({ match }: { match: Match }) {
                 {t(match.status as "live" | "upcoming" | "completed")}
               </Badge>
               <span className="text-[10px] text-primary/70 font-medium">
-                IPL
+                IPL 2026
               </span>
             </div>
             <div>
@@ -119,7 +132,7 @@ function MatchCard({ match }: { match: Match }) {
             </div>
           </div>
 
-          {/* Date row for upcoming matches */}
+          {/* Date row */}
           {match.status === "upcoming" && (
             <div className="flex items-center gap-1 px-4 pt-2 text-muted-foreground">
               <CalendarDays size={10} />
@@ -129,9 +142,10 @@ function MatchCard({ match }: { match: Match }) {
             </div>
           )}
 
+          {/* Teams */}
           <div className="px-4 py-4">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex-1 text-center">
+              <div className="team-pill flex-1 text-center">
                 <p className="font-display font-bold text-base text-foreground leading-tight">
                   {match.teamA}
                 </p>
@@ -141,10 +155,12 @@ function MatchCard({ match }: { match: Match }) {
                   </span>
                 )}
               </div>
-              <span className="text-muted-foreground font-bold text-sm px-2">
-                {t("vs")}
-              </span>
-              <div className="flex-1 text-center">
+              <div className="flex flex-col items-center px-2">
+                <span className="text-[11px] font-bold text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-background">
+                  {t("vs")}
+                </span>
+              </div>
+              <div className="team-pill flex-1 text-center">
                 <p className="font-display font-bold text-base text-foreground leading-tight">
                   {match.teamB}
                 </p>
@@ -156,7 +172,7 @@ function MatchCard({ match }: { match: Match }) {
               </div>
             </div>
             {match.venue && (
-              <p className="text-center text-[10px] text-muted-foreground mt-1">
+              <p className="text-center text-[10px] text-muted-foreground mt-2">
                 📍 {match.venue}
               </p>
             )}
@@ -171,9 +187,10 @@ function MatchCard({ match }: { match: Match }) {
             )}
           </div>
 
+          {/* Action */}
           <div className="px-4 pb-4">
             {pred && match.status !== "completed" ? (
-              <div className="flex items-center justify-center gap-2 py-2 rounded-lg bg-primary/10 border border-primary/20">
+              <div className="flex items-center justify-center gap-2 py-2 rounded-xl bg-primary/10 border border-primary/20">
                 <Zap size={13} className="text-primary" />
                 <span className="text-primary text-xs font-semibold">
                   Predicted: {pred.predictedTeam}
@@ -208,9 +225,9 @@ function MatchCard({ match }: { match: Match }) {
                 >
                   🔒 Predictions Closed
                 </Button>
-                {hoursUntil > 0 && hoursUntil <= 24 && (
+                {closedHint && (
                   <p className="text-center text-[10px] text-muted-foreground">
-                    Opens {Math.floor(24 - hoursUntil)}h before match
+                    {closedHint}
                   </p>
                 )}
               </div>
@@ -299,11 +316,13 @@ function MatchSkeleton() {
 export default function HomePage() {
   const { t } = useLang();
   const { actor, isFetching } = useActor();
+  const { unreadCount } = useNotifications();
   const profile = getProfile();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [usingSchedule, setUsingSchedule] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   useEffect(() => {
     if (!actor || isFetching) return;
@@ -331,7 +350,6 @@ export default function HomePage() {
             setLastUpdated(new Date());
           }
         } else {
-          // Fallback to IPL 2026 schedule
           setMatches(IPL_2026_MATCHES);
           setUsingSchedule(true);
           setLastUpdated(null);
@@ -348,11 +366,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-full">
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border gradient-header">
         <div className="px-4 py-3 flex items-center justify-between">
           <div>
             <h1 className="font-display font-bold text-xl text-foreground neon-text-glow">
-              MatchMind
+              Crick Mind
             </h1>
             <p className="text-xs text-muted-foreground">
               {usingSchedule
@@ -362,12 +380,30 @@ export default function HomePage() {
                   : t("matchPredictions")}
             </p>
           </div>
-          <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5">
-            <Zap size={13} className="text-primary" />
-            <span className="text-primary font-bold text-sm">
-              {profile.totalPoints}
-            </span>
-            <span className="text-primary/70 text-xs">{t("points")}</span>
+          <div className="flex items-center gap-2">
+            {/* Notification bell */}
+            <button
+              type="button"
+              data-ocid="home.notifications.button"
+              onClick={() => setNotifOpen(true)}
+              className="relative p-2 rounded-xl hover:bg-primary/10 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={20} className="text-primary" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-0.5">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+            {/* Points pill */}
+            <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5">
+              <Zap size={13} className="text-primary" />
+              <span className="text-primary font-bold text-sm">
+                {profile.totalPoints}
+              </span>
+              <span className="text-primary/70 text-xs">{t("points")}</span>
+            </div>
           </div>
         </div>
       </header>
@@ -425,6 +461,8 @@ export default function HomePage() {
           </motion.div>
         )}
       </main>
+
+      <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
     </div>
   );
 }

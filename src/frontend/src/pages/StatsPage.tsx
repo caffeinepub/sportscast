@@ -97,26 +97,30 @@ export default function StatsPage() {
     {
       label: t("totalPoints"),
       value: profile.totalPoints,
-      icon: <Award size={18} className="text-primary" />,
+      icon: <Award size={22} className="text-primary" />,
       color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
       label: t("totalPredictions"),
       value: total,
-      icon: <List size={18} className="text-blue-400" />,
-      color: "text-blue-400",
+      icon: <List size={22} className="text-blue-500" />,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
     },
     {
       label: t("correctPredictions"),
       value: correct,
-      icon: <Target size={18} className="text-green-400" />,
-      color: "text-green-400",
+      icon: <Target size={22} className="text-green-500" />,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
     },
     {
       label: t("accuracy"),
       value: `${accuracy}%`,
-      icon: <TrendingUp size={18} className="text-yellow-400" />,
-      color: "text-yellow-400",
+      icon: <TrendingUp size={22} className="text-yellow-500" />,
+      color: "text-yellow-500",
+      bgColor: "bg-yellow-500/10",
     },
   ];
 
@@ -140,9 +144,11 @@ export default function StatsPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.07 }}
             >
-              <Card className="bg-card border-border">
+              <Card className="card-gradient border-border shadow-sm">
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div
+                    className={`inline-flex items-center justify-center ${card.bgColor} p-2 rounded-lg mb-2`}
+                  >
                     {card.icon}
                   </div>
                   <p
@@ -159,7 +165,7 @@ export default function StatsPage() {
           ))}
         </div>
 
-        <Card className="bg-card border-border">
+        <Card className="card-gradient border-border">
           <CardHeader className="pb-2">
             <CardTitle className="font-display text-base text-foreground">
               Prediction Breakdown
@@ -201,7 +207,7 @@ export default function StatsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
+        <Card className="card-gradient border-border">
           <CardHeader className="pb-2">
             <CardTitle className="font-display text-base text-foreground">
               Recent Predictions

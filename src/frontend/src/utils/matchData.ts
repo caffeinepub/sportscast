@@ -116,10 +116,17 @@ export const IPL_2026_MATCHES: Match[] = [
 // Backward compat — no static/fake matches
 export const MATCHES: Match[] = [];
 
+/**
+ * Prediction window:
+ * - Opens 2 days (48 hours) before match
+ * - Closes 5 minutes before match start
+ */
 export function isPredictOpen(matchTime: number, status: string): boolean {
   if (status === "completed" || status === "live") return false;
-  const hoursUntil = (matchTime - Date.now()) / (1000 * 3600);
-  return hoursUntil > 24;
+  const msUntil = matchTime - Date.now();
+  const hoursUntil = msUntil / (1000 * 3600);
+  const minutesUntil = msUntil / (1000 * 60);
+  return hoursUntil <= 48 && minutesUntil > 5;
 }
 
 export function formatCountdown(matchTime: number): string {

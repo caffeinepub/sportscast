@@ -3,55 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Globe,
-  Info,
-  KeyRound,
-  Loader2,
-  RefreshCw,
-  User,
-  Zap,
-} from "lucide-react";
+import { Globe, Info, User, Zap } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useLang } from "../context/LangContext";
-import { useActor } from "../hooks/useActor";
 import { LANGUAGES } from "../i18n";
 import type { Lang } from "../i18n";
 import { getProfile, saveProfile } from "../utils/storage";
 
 export default function SettingsPage() {
   const { t, lang, setLang } = useLang();
-  const { actor, isFetching } = useActor();
   const [profile, setProfile] = useState(getProfile);
   const [username, setUsername] = useState(profile.username);
-
-  // API Keys state
-  const [cricketKey, setCricketKey] = useState("");
-  const [footballKey, setFootballKey] = useState("");
-  const [savingKeys, setSavingKeys] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [keysLoaded, setKeysLoaded] = useState(false);
-
-  // Load existing keys on mount
-  useEffect(() => {
-    if (!actor || isFetching || keysLoaded) return;
-    async function loadKeys() {
-      try {
-        const keys = await (actor as any).getApiKeys();
-        if (keys) {
-          setCricketKey(keys.cricket ?? "");
-          setFootballKey(keys.football ?? "");
-        }
-      } catch {
-        // Backend method not available yet
-      } finally {
-        setKeysLoaded(true);
-      }
-    }
-    loadKeys();
-  }, [actor, isFetching, keysLoaded]);
 
   function handleSaveUsername() {
     const trimmed = username.trim();
@@ -72,48 +36,6 @@ export default function SettingsPage() {
     saveProfile(updated);
   }
 
-  async function handleSaveApiKeys() {
-    if (!actor) {
-      toast.error("Not connected to backend");
-      return;
-    }
-    setSavingKeys(true);
-    try {
-      await (actor as any).setApiKeys(cricketKey.trim(), footballKey.trim());
-      // Trigger immediate cache refresh
-      try {
-        await (actor as any).fetchAndCacheMatches();
-      } catch {
-        // Non-critical
-      }
-      toast.success("API keys saved! Match data will refresh shortly.");
-    } catch {
-      toast.error("Failed to save API keys. Try again.");
-    } finally {
-      setSavingKeys(false);
-    }
-  }
-
-  async function handleRefreshNow() {
-    if (!actor) {
-      toast.error("Not connected to backend");
-      return;
-    }
-    setRefreshing(true);
-    try {
-      const success = await (actor as any).fetchAndCacheMatches();
-      if (success) {
-        toast.success("Match data refreshed successfully!");
-      } else {
-        toast.error("Refresh failed. Check your API keys in settings.");
-      }
-    } catch {
-      toast.error("Refresh failed. Make sure API keys are set.");
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
   return (
     <div className="min-h-full">
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-4">
@@ -121,7 +43,7 @@ export default function SettingsPage() {
           {t("settings")}
         </h1>
         <p className="text-xs text-muted-foreground">
-          Customize your SportsCast
+          Customize your Crick Mind
         </p>
       </header>
 
@@ -171,102 +93,6 @@ export default function SettingsPage() {
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* API Keys Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
-        >
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="font-display text-base flex items-center gap-2">
-                <KeyRound size={16} className="text-primary" />
-                API Keys
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="cricket-key"
-                  className="text-sm text-foreground"
-                >
-                  Cricket API Key
-                  <span className="ml-1.5 text-muted-foreground text-xs">
-                    (CricAPI)
-                  </span>
-                </Label>
-                <Input
-                  id="cricket-key"
-                  data-ocid="settings.cricket_key.input"
-                  type="password"
-                  value={cricketKey}
-                  onChange={(e) => setCricketKey(e.target.value)}
-                  placeholder="Enter CricAPI key"
-                  className="bg-secondary/50 font-mono text-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="football-key"
-                  className="text-sm text-foreground"
-                >
-                  Football API Key
-                  <span className="ml-1.5 text-muted-foreground text-xs">
-                    (API-Football)
-                  </span>
-                </Label>
-                <Input
-                  id="football-key"
-                  data-ocid="settings.football_key.input"
-                  type="password"
-                  value={footballKey}
-                  onChange={(e) => setFootballKey(e.target.value)}
-                  placeholder="Enter API-Football key"
-                  className="bg-secondary/50 font-mono text-sm"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  data-ocid="settings.api_keys.save_button"
-                  className="flex-1 bg-primary text-primary-foreground"
-                  onClick={handleSaveApiKeys}
-                  disabled={savingKeys || !actor}
-                >
-                  {savingKeys ? (
-                    <>
-                      <Loader2 size={14} className="mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save API Keys"
-                  )}
-                </Button>
-                <Button
-                  data-ocid="settings.api_keys.secondary_button"
-                  variant="outline"
-                  className="shrink-0"
-                  onClick={handleRefreshNow}
-                  disabled={refreshing || !actor}
-                  title="Refresh match data now"
-                >
-                  {refreshing ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <RefreshCw size={14} />
-                  )}
-                </Button>
-              </div>
-
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                🔒 Keys are stored securely on the ICP blockchain. Match data
-                refreshes automatically every 24 hours. Use the refresh button
-                to update immediately.
-              </p>
             </CardContent>
           </Card>
         </motion.div>
@@ -335,7 +161,7 @@ export default function SettingsPage() {
               <Separator className="bg-border" />
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Theme</span>
-                <span className="text-sm text-foreground">Dark Mode</span>
+                <span className="text-sm text-foreground">Purple & White</span>
               </div>
               <Separator className="bg-border" />
               <div className="flex justify-between">

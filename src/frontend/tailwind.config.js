@@ -78,7 +78,7 @@ export default {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
-        neon: "0 0 12px oklch(0.88 0.29 145 / 0.4), 0 0 32px oklch(0.88 0.29 145 / 0.15)",
+        neon: "0 0 12px oklch(0.52 0.24 292 / 0.35), 0 0 28px oklch(0.52 0.24 292 / 0.12)",
       },
       keyframes: {
         "accordion-down": {
