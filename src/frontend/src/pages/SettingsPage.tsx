@@ -1,12 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Globe, Info, User, Zap } from "lucide-react";
+import { Globe, Info } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useLang } from "../context/LangContext";
 import { LANGUAGES } from "../i18n";
 import type { Lang } from "../i18n";
@@ -15,19 +11,6 @@ import { getProfile, saveProfile } from "../utils/storage";
 export default function SettingsPage() {
   const { t, lang, setLang } = useLang();
   const [profile, setProfile] = useState(getProfile);
-  const [username, setUsername] = useState(profile.username);
-
-  function handleSaveUsername() {
-    const trimmed = username.trim();
-    if (!trimmed) {
-      toast.error("Username cannot be empty");
-      return;
-    }
-    const updated = { ...profile, username: trimmed };
-    setProfile(updated);
-    saveProfile(updated);
-    toast.success("Username saved!");
-  }
 
   function handleLangChange(code: Lang) {
     setLang(code);
@@ -48,59 +31,11 @@ export default function SettingsPage() {
       </header>
 
       <main className="px-4 py-4 space-y-4">
+        {/* Language */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-        >
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="font-display text-base flex items-center gap-2">
-                <User size={16} className="text-primary" />
-                {t("myProfile")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2 bg-primary/10 rounded-lg px-3 py-2.5 border border-primary/20">
-                <Zap size={16} className="text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  {t("totalPoints")}:
-                </span>
-                <span className="font-bold text-primary text-lg">
-                  {profile.totalPoints}
-                </span>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-sm text-foreground">
-                  Username
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="username"
-                    data-ocid="settings.username.input"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter username"
-                    className="bg-secondary/50"
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveUsername()}
-                  />
-                  <Button
-                    data-ocid="settings.username.save_button"
-                    className="bg-primary text-primary-foreground shrink-0"
-                    onClick={handleSaveUsername}
-                  >
-                    Save
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
         >
           <Card className="bg-card border-border">
             <CardHeader className="pb-3">
@@ -139,10 +74,11 @@ export default function SettingsPage() {
           </Card>
         </motion.div>
 
+        {/* About */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: 0.1 }}
         >
           <Card className="bg-card border-border">
             <CardHeader className="pb-3">
