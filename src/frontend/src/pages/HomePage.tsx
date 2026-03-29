@@ -374,7 +374,7 @@ export default function HomePage() {
             </h1>
             <p className="text-xs text-muted-foreground">
               {usingSchedule
-                ? "🗓 IPL 2026 Schedule"
+                ? "🗓 IPL 2026 · 70 Matches"
                 : lastUpdated
                   ? `🟢 Live · Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                   : t("matchPredictions")}
@@ -453,10 +453,11 @@ export default function HomePage() {
           >
             <CalendarDays size={14} className="text-primary shrink-0 mt-0.5" />
             <span>
-              More matches will be added as the season schedule is released —{" "}
+              Showing all 70 IPL 2026 league matches{" "}
               <span className="text-primary font-medium">
-                Season opens March 28, 2026
+                (Mar 28 – May 24)
               </span>
+              . Playoffs TBD.
             </span>
           </motion.div>
         )}
